@@ -1,8 +1,7 @@
 <template>
   <div id="layout" class="d-flex flex-column" :class="getClassNameForStyling">        
     <!-- <faucet-header v-on:update:chain="refresh()" @onLogin="onLoginAccount"></faucet-header> -->
-    <faucet-header v-on:update:chain="refresh()"></faucet-header>    
-    <div class="content container-fluid">      
+    <div class="content">      
       <div v-if="metamaskDisabled && userIsLoggedIn" class="disabled-overlay">
         <div>           
           <div class="network-error-container mb-3">
@@ -42,17 +41,18 @@
           </div>              
         </div>
       </div>         
-      <div class="row">
-        <div v-show="showSidebar" class="col-lg-3">
+      <div class="row column-wrapper">
+        <div v-show="showSidebar" class="rmv-spacing col-lg-3">
           <faucet-sidebar></faucet-sidebar>      
         </div>
-        <div :class="contentClass">
+        <div id="content-container" :class="contentClass">
           <loading-spinner v-if="showLoadingSpinner" :showBackdrop="true"></loading-spinner>
           <router-view></router-view>
         </div>        
-      </div>          
+      </div>
     </div>    
-    <faucet-footer></faucet-footer>
+    <faucet-header v-on:update:chain="refresh()"></faucet-header>        
+    <!-- <faucet-footer></faucet-footer> -->
   </div>  
 </template>
 
@@ -243,6 +243,9 @@ export default class Layout extends Vue {
     min-height: 100vh;
     flex-direction: column;
   }
+  #content-container {
+    padding: 24px 48px;
+  }
   .content {
     display: flex;
     flex: 1;
@@ -250,6 +253,9 @@ export default class Layout extends Vue {
     .row {
       width: 100%;;
     }   
+  }
+  .column-wrapper {
+    background-color: #eff3f5;
   }
   .sidebar-container {
     display: flex;
@@ -299,6 +305,10 @@ export default class Layout extends Vue {
 </style>
 
 <style lang="scss">
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+  }
 
   .rmv-spacing {
     margin: 0px;

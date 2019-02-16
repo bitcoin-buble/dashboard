@@ -1,5 +1,5 @@
 <template>
-  <div id="faucet-header" @login="startPolling" ref="header" class="header">
+  <!-- <div id="faucet-header" @login="startPolling" ref="header" class="header">
     <b-alert variant="danger"
                dismissible
                :show="!!showErrorMsg"
@@ -22,7 +22,6 @@
         <b-navbar-toggle style="border: 0px;" target="nav_collapse"></b-navbar-toggle>
         <b-collapse is-nav id="nav_collapse">
 
-          <!-- Right aligned nav items -->
           <b-navbar-nav class="ml-auto">
             
             <b-nav-form>
@@ -43,23 +42,34 @@
           </b-navbar-nav>
         </b-collapse>        
       </div>
-    </b-navbar> 
-    <b-navbar type="dark" variant="primary" class="top-nav" toggleable>
-      <div class="container-fluid ensure-padded">
+    </b-navbar>  -->
 
-        <div class="col" v-if="userIsLoggedIn">
-          <b-navbar-nav v-if="formattedTimeUntilElectionCycle">
-            <div id="countdown-container">
-              <progress :value="timeLeft" max="600" ref="electionCycleProgressBar"></progress>
-            </div>            
-            <b-tooltip target="countdown-container" placement="bottom">
-              <span>Next election cycle:</span> <strong class="highlight">{{formattedTimeUntilElectionCycle}}</strong>
-            </b-tooltip>
-          </b-navbar-nav>      
+    <b-navbar variant="primary" class="bottom-bar" toggleable>
+      <div class="inner-container">
+
+        <div class="col-md-3 v-center" v-if="userIsLoggedIn">
+          <div class="footer-title">
+            <img src="../assets/logo-grey.svg">
+          </div>          
         </div>
 
-        <div class="col">          
+        <div class="col-md-9 v-center">          
           <b-navbar-nav>
+            <b-nav-item>
+              <div v-if="formattedTimeUntilElectionCycle">
+                <div class="countdown-container">
+                  <span>Next election cycle: </span><progress class="countdown-bar" :value="timeLeft" max="600" ref="electionCycleProgressBar"></progress>
+                </div>            
+                <b-tooltip target="countdown-container" placement="bottom">
+                  <strong class="highlight">{{formattedTimeUntilElectionCycle}}</strong>
+                </b-tooltip>
+              </div>
+              <div v-else>
+                <div class="countdown-container">
+                  <span>Next election cycle: </span><progress class="countdown-bar" value="600" max="600"></progress> 
+                </div>
+              </div>              
+            </b-nav-item>
             <div class="sub-menu-links" v-if="!errorRefreshing">
               <b-nav-item v-if="isLoggedIn">
                 <span id="mainnetBalance" class="mr-2">Mainnet: <strong class="highlight">{{this.userBalance.mainnetBalance}}</strong></span>
@@ -69,7 +79,7 @@
                 <span id="stakedAmount">Staked: <strong class="highlight">{{this.userBalance.stakedAmount}}</strong></span>
                 <b-tooltip target="stakedAmount" placement="bottom" title="This is the total amount you have staked to validators"></b-tooltip>
               </b-nav-item>
-              <b-nav-item v-if="isLoggedIn" :hidden="false" class="add-border-left">
+              <b-nav-item v-if="isLoggedIn" :hidden="false">
                 <a @click="logOut" class="sign-out-link">Sign out</a>
               </b-nav-item>          
             </div>
@@ -434,10 +444,39 @@ export default class FaucetHeader extends Vue {
   }
 }
 
-#countdown-container {
+.inner-container {
+  display: flex;
+  width: 100%;
+  ul {
+    margin-left: auto;
+  }
+}
+
+.footer-title {
+  img {
+    position: relative;
+    left: -16px;
+    width: 120px;
+  }
+}
+
+.v-center {
+  display: flex;
+  align-items: center;  
+}
+
+.countdown-container {
   display: flex;
   justify-content: center;
   align-content: center;
+  span {
+    display: inline-block;
+    margin-right: 12px;
+  }  
+  .countdown-bar {
+    position: relative;
+    top: 2px;
+  }
 }
 
 .sign-out-link {  
@@ -475,10 +514,14 @@ a.hover-warning:hover {
   clear: both;
 }
 
-.top-nav {
+.bottom-bar {
   background-color: #ffffff !important;
   background-image: initial !important;
-  border-bottom: 2px solid #f2f1f3;
+  box-shadow: 0 2px 10px 0 rgba(0,0,0,.08);
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  z-index: 999;  
   .col {
     padding: 0px;
     ul {
@@ -491,10 +534,6 @@ a.hover-warning:hover {
       }
     }
   }
-}
-
-.ensure-padded {
-  padding: 0 15px !important;
 }
 
 #balance {
@@ -527,9 +566,6 @@ a.hover-warning:hover {
 //   left: 8px;
 // }
 
-.add-border-left {
-  border-left: 2px solid #f2f1f3;
-}
 
 </style>
 
