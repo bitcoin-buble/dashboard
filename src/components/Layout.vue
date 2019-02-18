@@ -42,7 +42,7 @@
         </div>
       </div>         
       <div class="row column-wrapper">
-        <div v-show="showSidebar" class="rmv-spacing col-lg-3">
+        <div v-show="showSidebar" class="rmv-spacing col-lg-2">
           <faucet-sidebar></faucet-sidebar>      
         </div>
         <div id="content-container" :class="contentClass">
@@ -232,7 +232,7 @@ export default class Layout extends Vue {
   }
 
   get contentClass() {
-    return this.showSidebar ? 'col-lg-9' : 'col-lg-12'
+    return this.showSidebar ? 'col-lg-10' : 'col-lg-12'
   }
 
 }</script>
@@ -244,7 +244,7 @@ export default class Layout extends Vue {
     flex-direction: column;
   }
   #content-container {
-    padding: 24px 48px;
+    padding: 36px 12px;
   }
   .content {
     display: flex;
