@@ -219,7 +219,7 @@
 }
 
 h3 {
-  color: gray
+  color: #6e6f96;
 }
 
 </style>
