@@ -365,7 +365,10 @@ export default class Layout extends Vue {
         width: 100%;
         margin: 0 0 12px 0 !important;
       }
-    }    
+    }
+    .sidebar-container {
+      max-width: 100% !important;
+    }  
   }
 
   @media (max-width: 992px) {
@@ -390,6 +393,7 @@ export default class Layout extends Vue {
       border-left: 0px !important;
       border-bottom: 5px solid #5756e6;
     }
+    
   }
   
   @media (max-width: 1200px) {
