@@ -8,11 +8,11 @@
             <img src="../assets/metamask-error-graphic.png"/>
           </div>
           <h4>
-            Metamask error!?
+            {{ $t('components.layout.metamask_error') }}
           </h4>
           <div>
             <span>
-              Please enable Metamask or switch to a supported browser
+              {{ $t('components.layout.please_enable_metamask_or_switch') }}
             </span>
           </div>              
         </div>
@@ -23,20 +23,20 @@
             <img src="../assets/network-error-graphic.png"/>
           </div>
           <h4>
-            Mapping error!?
+            {{ $t('components.layout.mapping_error') }}
           </h4>
           <div v-if="mappingError">
 
-            Your account appears to be mapped with the following address: <br>
+            {{ $t('components.layout.your_account_appears_to_be') }} <br>
             <span class="address">{{mappingError.mappedEthAddress}}</span> <br>
-            but your current account address is: <br>
+            {{ $t('components.layout.but_your_current_account_address') }} <br>
             <span class="address">{{mappingError.metamaskAddress}}</span> <br>
-            Please change your Metamask account
+            {{ $t('components.layout.please_change_your_metamask_account') }}
 
           </div>
           <div v-else>
             <span>
-              Please check your Metamask account and/or network
+              {{ $t('components.layout.please_check_your_metamask_account') }}
             </span>
           </div>              
         </div>
@@ -70,6 +70,7 @@ const DappChainStore = createNamespacedHelpers('DappChain')
 const DPOSStore = createNamespacedHelpers('DPOS')
 
 import { initWeb3 } from '../services/initWeb3'
+import { isIP } from 'net';
 
 @Component({
   components: {
@@ -191,10 +192,12 @@ export default class Layout extends Vue {
       })      
     }
     
-    window.ethereum.on('accountsChanged', async (accounts) => {
-      if(this.userIsLoggedIn) this.ensureIdentityMappingExists({currentAddress: accounts[0]})
-      this.setCurrentMetamaskAddress(accounts[0])
-    })
+    if(window.ethereum) {
+      window.ethereum.on('accountsChanged', async (accounts) => {
+        if(this.userIsLoggedIn) this.ensureIdentityMappingExists({currentAddress: accounts[0]})
+        this.setCurrentMetamaskAddress(accounts[0])
+      })
+    }
 
   }
 

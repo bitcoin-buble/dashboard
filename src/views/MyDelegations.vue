@@ -8,7 +8,7 @@
               <faucet-table :items="delegations"/>
             </div>
             <div v-if="loading === false && delegations.length == 0">
-              <h2>No Delegations</h2>
+              <h2>{{ $t('views.my_delegations.no_delegations') }}</h2>
             </div>
           </div>
           <div v-if="loading === true">
@@ -86,7 +86,7 @@ export default class MyDelegations extends Vue {
     try {
       candidates = await this.dposUser.listCandidatesAsync()
     } catch(err) {
-      console.log("Error fetching delegation list:", err)
+      console.error("Error fetching delegation list:", err)
     }
 
     if(candidates.length <= 0) return

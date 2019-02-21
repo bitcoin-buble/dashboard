@@ -249,10 +249,10 @@ export default {
         state.LoomTokenNetwork = LoomTokenNetwork
         state.LoomTokenInstance = LoomTokenInstance
       } catch (err) {
-        console.log(err)
+        console.error(err)
       }
     },
-    async getMetamaskLoomBalance({ state }, payload) {
+    async getMetamaskLoomBalance({ state , commit}, payload) {
       if (!state.web3) return 0
 
       const web3js = state.web3
@@ -266,7 +266,7 @@ export default {
       let limitDecimals = parseFloat(balance).toFixed(2)
       return limitDecimals
       } catch (err) {
-        console.log(err)
+        commit('setErrorMsg', {msg: "Error getting metamask balance", forever: false, report:true, cause:err}, {root: true})
         return 0
       }
     },
@@ -277,7 +277,7 @@ export default {
       const privateKeyString = localStorage.getItem('privatekey')
       if (!privateKeyString) {
         // commit('setErrorMsg', 'Error, Please logout and login again', { root: true })
-        throw 'No Private Key, Login again'
+        throw new Error('No Private Key, Login again')
       }
       
       const network = state.chainUrls[state.chainIndex].network
@@ -339,7 +339,7 @@ export default {
         try {
           await dispatch('initDposUser')
         } catch (err) {
-          console.log(err)
+          console.error("Error getting Loom balance", err)
           return 0
         }
       }
@@ -359,8 +359,7 @@ export default {
         const result = await state.dposUser.delegateAsync(payload.candidate, new BN(weiAmount, 10), tier)
         commit('setSuccessMsg', {msg: `Success delegating ${payload.amount} tokens`, forever: false}, {root: true})
       } catch(err) {
-        console.log(err)
-        commit('setErrorMsg', {msg: err.toString(), forever: false}, {root: true})
+        commit('setErrorMsg', {msg: "Error delegating", forever: false, report:true, cause:err}, {root: true})
       }      
     },
     async undelegateAsync({ state, dispatch, commit }, payload) {
@@ -373,25 +372,42 @@ export default {
         const result = await state.dposUser.undelegateAsync(payload.candidate, new BN(weiAmount,10))
         commit('setSuccessMsg', {msg: `Success un-delegating ${loomAmount} tokens`, forever: false}, {root: true})
       } catch(err) {
-        commit('setErrorMsg', {msg: err.toString(), forever: false}, {root: true})
+        commit('setErrorMsg', {msg: "Failed to undelegate", forever: false, report:true, cause:err}, {root: true})
       }
     }, 
     async getValidatorsAsync({ state, dispatch }, payload) {
       const dpos2 = await dispatch('getDpos2')
-      const dpos2Validators = await dpos2.getValidatorsAsync()
-      const dpos2Candidates = await dpos2.getCandidatesAsync()
-      const candidateList = []
-      for (let candidate of dpos2Candidates) {
-        candidateList.push({
+      const [dpos2Validators,dpos2Candidates,dpos2Delegations] = await Promise.all([
+        dpos2.getValidatorsAsync(),
+        dpos2.getCandidatesAsync(),
+        dpos2.getAllDelegations()
+      ]).then( async (all) => all)
+      const keyedDelegTotals = dpos2Delegations
+        .filter(dc => dc.delegationsArray.length > 0 )
+        .reduce((agg,dc) => {
+          agg.push(...dc.delegationsArray);
+          return agg;
+        },[])
+        .reduce((agg,delegation) => {
+          let key = delegation.validator.local.toString();
+          if (key in agg) agg[key] = agg[key].add(delegation.amount)
+          else  agg[key] = delegation.amount
+          return agg;
+        },{})
+      //debugger
+      const candidateList = dpos2Candidates.map((candidate,i) => {
+        let address = LocalAddress.fromPublicKey(candidate.pubKey).toString();
+        return {
           pubKey: CryptoUtils.Uint8ArrayToB64(candidate.pubKey),
-          address: LocalAddress.fromPublicKey(candidate.pubKey).toString(),
+          address,
           active: false,
           website: candidate.website,
           description: candidate.description,
           fee: candidate.fee.toString(),
-          name: candidate.name
-        })
-      }
+          name: candidate.name,
+          delegationsTotal: keyedDelegTotals[address] ? keyedDelegTotals[address].toString() : 0
+        }
+      })
       const combination = [...candidateList]
       for (let validator of dpos2Validators) {
         const pubKey = CryptoUtils.Uint8ArrayToB64(validator.pubKey)
@@ -421,7 +437,7 @@ export default {
       const privateKeyString = localStorage.getItem('privatekey')
       if (!privateKeyString) {
         // commit('setErrorMsg', 'Error, Please logout and login again', { root: true })
-        throw 'No Private Key, Login again'
+        throw new Error('No Private Key, Login again')
       }
 
       const dpos2 = await dispatch('getDpos2', {
@@ -502,7 +518,7 @@ export default {
         }         
       } catch (err) {
         commit("DPOS/setStatus", "no_mapping", {root: true})
-        console.log(err)
+        console.error("Error ensuring mapping exists: ", err)
         // commit('setErrorMsg', {msg: `Error mapping identities, please try again`, forever: true}, {root: true})
         return
       }
@@ -515,8 +531,7 @@ export default {
         await state.dposUser.mapAccountsAsync()
         commit("DPOS/setStatus", "mapped", {root: true})
       } catch (err) {
-        console.log(err)
-        commit('setErrorMsg', {msg: `Failed establishing mapping: ${err}`, forever: false}, {root: true})
+        commit('setErrorMsg', {msg: "Failed establishing mapping", forever: false, report:true, cause: err}, {root: true})
       }
     },
     async init({ state, commit, rootState }, payload) {

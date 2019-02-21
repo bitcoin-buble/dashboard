@@ -3,12 +3,15 @@
     <div class="faucet-content">
       <div>
         <main>
-          <div class="container mb-5 column py-3 p-3 d-flex" v-if="validatorList !== null && validatorList.length > 0">
-            <h1>Validators</h1>
-            <faucet-table :items="validatorList" :fields="fields" sortBy="Weight" @row-clicked="showValidatorDetail"></faucet-table>
+          <div class="container mb-5 column py-3 p-3 d-flex" v-if="validators !== null && validators.length > 0">
+            <h1>{{ $t('views.validator_list.validators') }}</h1>
+            <p><fa icon="info-circle" fixed-width /> Staking is disabled on bootstrap validators.</p>
+            <faucet-table :items="validators" :fields="fields" sortBy="Weight" :rowClass="validatorCssClass" @row-clicked="showValidatorDetail"></faucet-table>
           </div>
-          <div v-else-if="validatorList !== null && validatorList.length == 0">
-            No validators available, please try again later
+          <div v-else-if="validators !== null && validators.length == 0">
+            <h2>
+              {{ $t('views.validator_list.no_validators_available_please_try') }}
+            </h2>
           </div>
           <div class="container mb-5 column py-3 p-3 d-flex" v-else>            
             <loading-spinner :showBackdrop="true"></loading-spinner>
@@ -40,6 +43,12 @@ import { DPOSUser, CryptoUtils, LocalAddress } from "loom-js";
     FaucetFooter,
     LoadingSpinner,
   },
+  computed: {
+    ...DPOSStore.mapState([
+      'validators',
+      'validatorFields'
+    ])
+  },
   methods: {
     ...mapMutations([
       'setErrorMsg'
@@ -56,65 +65,25 @@ import { DPOSUser, CryptoUtils, LocalAddress } from "loom-js";
   }
 })
 export default class ValidatorList extends Vue {
-  fields = [
-    { key: 'Name', sortable: true },
-    { key: 'Status', sortable: true },
-    { key: 'Stake', sortable: true },
-    // { key: 'Weight', sortable: true },
-    { key: 'Fees', sortable: true },
-    // { key: 'Uptime', sortable: true },
-    // { key: 'Slashes', sortable: true },
-  ]
-  validatorList = null
 
   async mounted() {
     await this.refresh()
   }
 
   async refresh() {
-    this.validatorList = await this.getValidatorList()
+    await this.getValidatorList()
   }
 
-  // async getValidatorList() {
-  //   try {
-  //     const validators = await this.getValidatorsAsync()
-  //     if (validators.length === 0) {
-  //       return null
-  //     }
-  //     const validatorList = []
-  //     for (let i in validators) {
-  //       const validator = validators[i]
-  //       validatorList.push({
-  //         Name: "Validator #" + (parseInt(i) + 1),
-  //         Address: validator.address,
-  //         Status: validator.active ? "Active" : "Inactive",
-  //         Stake: (validator.stake || '0'),
-  //         Weight: (validator.weight || '0') + '%',
-  //         Fees: (validator.fee || '0') + '%',
-  //         Uptime: (validator.uptime || '0') + '%',
-  //         Slashes: (validator.slashes || '0') + '%',
-  //         Description: (validator.description) || null,
-  //         Website: (validator.website) || null,
-  //         _cellVariants: validator.active ? { Status: 'active'} : undefined,
-  //         pubKey: (validator.pubKey)
-  //       })
-  //     }
-  //     this.setValidators(validatorList)
-  //     return validatorList
-  //   } catch(err) {
-  //     this.setErrorMsg('Fetch Validator List Failed')
-  //     console.log(err)
-  //     return null
-  //   }
-  // }
+  /**
+   * adds class bootstrap node if is bootstrap
+   */
+  validatorCssClass( item, type) {
+    console.log(34943034)
+    return item.isBoostrap ? ['boostrap-validator'] : []
+  } 
 
   showValidatorDetail(record, index) {
-    this.$router.push({
-      name: 'validatorDetail',
-      params: {
-        info: record
-      }
-    })
+    this.$router.push(`/validator/${index}`)
   }
 }</script>
 
@@ -145,15 +114,26 @@ $theme-colors: (
     .column {
       flex-direction: column;
     }
-    h4, h1 {
+    h4, h2, h1 {
       color: gray;
     }
+    th[aria-colindex="3"], td[aria-colindex="3"] {
+      text-align: right !important;
+    }
+    th[aria-colindex="4"], td[aria-colindex="4"] {
+      text-align: right !important;
+    }
+    #faucet-table.table tbody tr td.table-danger {
+      opacity: 0.5;
+    }
+    #faucet-table.table tbody tr td.table-danger ~ td {
+      opacity: 0.5
+    }
   }
-}
 
-</style>
-<style>
-body {
-  overflow-y: scroll;
+
 }
+  body {
+    overflow-y: scroll;
+  }
 </style>
