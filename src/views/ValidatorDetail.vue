@@ -14,7 +14,10 @@
         <main>
           <loading-spinner v-if="!finished" :showBackdrop="true"></loading-spinner>
           <div class="container mb-2 column py-3 p-3 d-flex bottom-border">
-            <h1>{{validator.Name}}</h1>
+            <h1>
+              {{validator.Name }}
+              <span> {{isBootstrap ? "(bootstrap)" : ''}}</span>
+            </h1>
             <input type="text" ref="address" :value="validator.Address" tabindex='-1' aria-hidden='true' style="position: absolute; left: -9999px">
             <h4><a @click="copyAddress">{{validator.Address}} <fa :icon="['fas', 'copy']" class="text-grey" fixed-width/></a></h4>
             <div v-if="userIsLoggedIn && !validator.isBootstrap">
@@ -46,13 +49,15 @@
                 <b-button id="claimRewardBtn" class="px-5 py-2" variant="primary" @click="claimRewardHandler" :disabled="!canClaimReward">{{ $t('views.rewards.claim_reward') }}</b-button>
                 <b-tooltip target="claimRewardBtn" placement="bottom" title="Once the lock time period has expired, click here to claim your reward"></b-tooltip>
               </div> -->
-              <div v-if="!this.prohibitedNodes.includes(this.validator.Name)" class="col col-sm-12 col-md-9 right-container text-right">
+              <div v-if="!isBootstrap" class="col col-sm-12 col-md-9 right-container text-right">
                 <b-button id="delegateBtn" class="px-5 py-2" variant="primary" @click="openRequestDelegateModal" :disabled="!canDelegate || (delegationState != 'Bonded' && amountDelegated != 0)">Delegate</b-button>
                 <b-tooltip target="delegateBtn" placement="bottom" title="Transfer tokens to this validator"></b-tooltip>
                 <b-button id="undelegateBtn" class="px-5 py-2 mx-3" variant="primary" @click="openRequestUnbondModal" :disabled="!canDelegate || !hasDelegation || delegationState != 'Bonded'">Un-delegate</b-button>
                 <b-tooltip target="undelegateBtn" placement="bottom" title="Withdraw your delegated tokens"></b-tooltip>
-                <b-button id="redelegateBtn" class="px-5 py-2" variant="primary" @click="openRedelegateModal" :disabled="!hasDelegation || !canDelegate || (delegationState != 'Bonded' && amountDelegated != 0)">Redelegate</b-button>
-                <b-tooltip target="redelegateBtn" placement="bottom" title="Redelegate from/to another delegator"></b-tooltip>
+                <div v-if="!isProduction">
+                  <b-button id="redelegateBtn" class="px-5 py-2" variant="primary" @click="openRedelegateModal" :disabled="!hasDelegation || !canDelegate || (delegationState != 'Bonded' && amountDelegated != 0)">Redelegate</b-button>
+                  <b-tooltip target="redelegateBtn" placement="bottom" title="Redelegate from/to another delegator"></b-tooltip>
+                </div>
               </div>
             </div>
           </div>
@@ -124,13 +129,10 @@ const DPOSStore = createNamespacedHelpers('DPOS')
 })
 export default class ValidatorDetail extends Vue {
   fields = [
-    { key: 'Status', sortable: false },
-    { key: 'delegationsTotal', sortable: true , label: 'Delegations Total'},
-    { key: 'votingPower', sortable: true , label: 'Voting Power'},
-    // { key: 'Weight', sortable: false },
+    { key: 'Status' },
+    { key: 'totalStaked', label: 'Total Staked'},
+    { key: 'votingPower', label: 'Voting Power'},
     { key: 'Fees', sortable: false },
-    // { key: 'Uptime', sortable: false },
-    // { key: 'Slashes', sortable: false },
   ]
   validator = {}
 
@@ -152,7 +154,7 @@ export default class ValidatorDetail extends Vue {
   ]
 
   states = ["Bonding", "Bonded", "Unbounding"]
-
+  isProduction = window.location.hostname === "dashboard.dappchains.com"
 
   async beforeMount() {
     let index = this.$route.params.index
@@ -321,6 +323,10 @@ export default class ValidatorDetail extends Vue {
 
   get canClaimReward() {
     return this.hasDelegation && this.lockTimeExpired ? true : false
+  }
+
+  get isBootstrap() {
+    return this.prohibitedNodes.includes(this.validator.Name)
   }
 
   openRequestDelegateModal() {

@@ -126,9 +126,9 @@
                             <div class="d-flex flex-row align-items-center">
                               <div class="mx-2" style="width: 250px">                                
                                 <span class="text-small text-gray">{{ $t('views.my_account.transfer_to_plasmachain_for_staking') }}</span>
-                                <b-form-input :placeholder="'max. ' + mainnetBalance" v-model="transferAmount" class="w-100"/>
+                                <b-form-input :placeholder="'max. ' + userBalance.mainnetBalance" v-model="transferAmount" class="w-100"/>
                                 <div class="d-flex flex-row justify-content-end">
-                                  <b-button class="text-small pt-0" variant="link" @click="transferAmount=mainnetBalance">{{ $t('views.my_account.use_maximum') }}</b-button>
+                                  <b-button class="text-small pt-0" variant="link" @click="transferAmount=userBalance.mainnetBalance">{{ $t('views.my_account.use_maximum') }}</b-button>
                                 </div>
                               </div>
                               <b-button id="depositBtn" style="width: 160px" variant="primary" @click="depositHandler">{{ $t('views.my_account.deposit') }}</b-button>
@@ -410,7 +410,7 @@ export default class MyAccount extends Vue {
       return
     }
 
-    this.isLoading = true
+    this.setShowLoadingSpinner(true)
     
     try {
       await this.depositAsync({amount: this.transferAmount})
@@ -420,7 +420,9 @@ export default class MyAccount extends Vue {
       this.setError({msg: "Deposit failed, please try again", err})
     }
     this.transferAmount = ""
-    this.isLoading = false
+
+    this.setShowLoadingSpinner(false)
+    
   }
 
   async withdrawHandler() {
@@ -430,7 +432,7 @@ export default class MyAccount extends Vue {
       return
     }
 
-    this.isLoading = true
+    this.setShowLoadingSpinner(true)
 
     try {
       await this.withdrawAsync({amount: this.withdrawAmount})
@@ -440,7 +442,8 @@ export default class MyAccount extends Vue {
       this.setError({msg: "Withdraw failed, please try again", err})
     }
     this.withdrawAmount = ""
-    this.isLoading = false
+
+    this.setShowLoadingSpinner(false)
 
   }
 
