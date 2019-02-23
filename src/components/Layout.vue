@@ -264,9 +264,6 @@ export default class Layout extends Vue {
   .column-wrapper {
     background-color: #eff3f5;
   }
-  .sidebar-container {
-    max-width: 340px;
-  }
 
   .disabled-overlay {
     position: fixed;
@@ -390,6 +387,7 @@ export default class Layout extends Vue {
       justify-content: space-evenly;
       padding-top: 0 !important;
       height: auto !important;
+      width: 100%; 
       li {
         max-width: 200px;
         display: inline-block;
@@ -410,7 +408,13 @@ export default class Layout extends Vue {
     }
     
   }
-  
+
+ @media (min-width: 992px) {
+  .sidebar-container {
+    max-width: 340px;
+  }
+ }
+
   @media (max-width: 1200px) {
     
   }
