@@ -310,6 +310,7 @@ export default class Layout extends Vue {
 <style lang="scss">
 
   body {
+    min-width: 580px;
     font-family: 'Roboto Condensed', sans-serif;
   }
 
